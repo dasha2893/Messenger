@@ -1,0 +1,112 @@
+@(currentUserDialogs: collection.mutable.Buffer[domain.User])
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Messenger</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/jquery.mobile-1.4.5.min.css")">
+        <script src="@routes.Assets.at("javascripts/jquery-1.9.0.min.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("javascripts/jquery.mobile-1.4.5.min.js")" type="text/javascript"></script>
+    </head>
+    <body>
+        <div data-role="page" id="main" data-theme="b">
+            <div data-role="panel" id="menu" data-theme="b">
+                <ul style="list-style-type: none;">
+                    <li><a href="#friends" onclick="getFriends('Max')"><h3>Friends</h3></a></li>
+                    <li><a href="#main"><h3>Dialogs</h3></a></li>
+                    <li><a href="#settings"><h3>Settings</h3></a></li>
+                </ul>
+            </div>
+
+            <div data-role="header" style="background-color: black; height: 70px;">
+                <h1 style="font-size: 15pt;">Messenger</h1>
+                <a href="#menu" style="background-color: black; border-color: black; font-size: 13pt;" class="ui-btn ui-btn-b ui-btn-inline ui-corner-all ui-shadow">Menu</a>
+            </div>
+
+            <div data-role="main" class="ui-content">
+                <h2>Dialogs</h2>
+                <ul data-role="listview" data-inset="true">
+                    @for( friend <- currentUserDialogs) {
+                        <li>
+                            <a href="#dialog" onclick="getMessages('@friend.login')">
+                                <img src='@friend.photo' style="padding: 10px; width: 100px; height: 60px;">
+                                <h2>@friend.login</h2>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+
+        <div data-role="page" id="dialog" data-theme="b"></div>
+
+        <div data-role="page" id="friends" data-theme="b"></div>
+
+        <div data-role="page" id="settings" data-theme="b"></div>
+
+            <!--Изоляция от траблов-->
+        <script type="text/javascript">
+            function getMessages(friend) {
+                console.log(friend);
+                $.ajax({
+                    type: 'GET',
+                    url: '/getMessages?f1=' +friend + '&f2=' + 'Max',
+                    success: function (data) {
+                        $('#dialog').html(data);
+                    },
+                    error: function (data) {
+                        console.log('getMessages Error =  ' + data);
+                    }
+                });
+            }
+
+
+            function getFriends(user) {
+                $.ajax({
+                    type: 'GET',
+                    url: '/getFriends?user=' +user,
+                    success: function (data) {
+                        $('#friends').html(data);
+                    },
+                    error: function (data) {
+                        console.log('getMessages Error =  ' + data);
+                    }
+                });
+            }
+
+            function sendMessage(from, to) {
+                var message =  $('#inputMessage').val();
+                console.log(message);
+                $('#allMessages').append('<div id="messageRight"><p>'+ message + '</p></div></br>');
+                document.body.scrollTop = document.body.scrollHeight;
+                $.ajax({
+                    type: 'GET',
+                    url: '/saveMessage?from=' + from + '&to=' + to + '&message=' + message,
+                    success: function (data) {
+                        console.log('Success!');
+                    },
+                    error: function (data) {
+                        console.log('sendMessage Error =  ' + data);
+                    }
+                });
+                $('#inputMessage').val('');
+            }
+
+            function getDialogs() {
+                $.ajax({
+                    type: 'GET',
+                    url: '/getDialogs',
+                    success: function (data) {
+                        $('#main').html(data);
+                    },
+                    error: function (data) {
+                        console.log('sendMessage Error =  ' + data);
+                    }
+                });
+            }
+        </script>
+    </body>
+</html>

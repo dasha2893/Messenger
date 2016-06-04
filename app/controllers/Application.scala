@@ -1,11 +1,13 @@
 package controllers
 
-import domain.{User, Message}
+import domain.{Message, User}
+import play.api.libs.json._
 import play.api.mvc._
 
+import scala.Option
 import scala.collection.mutable
 
-object Storage{
+object Storage {
   val usersAndMassages = collection.mutable.HashMap[(String, String), mutable.Buffer[Message]]()
   val usersAndFriends = collection.mutable.HashMap[User, mutable.Buffer[User]]()
   val usersAndDialogs = collection.mutable.HashMap[String, mutable.Buffer[User]]()
@@ -15,7 +17,7 @@ object Storage{
   def init() {
 
     usersAndMassages +=(
-      "Daria"-> "Max" -> mutable.Buffer(
+      "Daria" -> "Max" -> mutable.Buffer(
         Message(from = "Daria", to = "Max", "Привет! Как дела?)"),
         Message(from = "Max", to = "Daria", "Привет!) норм, а у тя?"),
         Message(from = "Daria", to = "Max", "ЗБС"),
@@ -32,13 +34,13 @@ object Storage{
       )
 
     usersAndFriends +=(
-      User("Max","http://cs625722.vk.me/v625722760/5b1de/qGLHEiFw11o.jpg") -> mutable.Buffer(
-        User("Kate","http://cs630216.vk.me/v630216644/2e126/mYG74XCSFcw.jpg"),
-        User("Igor","http://cs636930.vk.me/v636930922/2e4b/kponFFQLxUs.jpg"),
-        User("Egor","http://cs605817.vk.me/v605817644/3537/Jrl90veK9xE.jpg"),
-        User("Masha","http://cs411823.vk.me/v411823644/208c/HhJOWfXTTRY.jpg")
+      User("Max", "http://cs625722.vk.me/v625722760/5b1de/qGLHEiFw11o.jpg") -> mutable.Buffer(
+        User("Kate", "http://cs630216.vk.me/v630216644/2e126/mYG74XCSFcw.jpg"),
+        User("Igor", "http://cs636930.vk.me/v636930922/2e4b/kponFFQLxUs.jpg"),
+        User("Egor", "http://cs605817.vk.me/v605817644/3537/Jrl90veK9xE.jpg"),
+        User("Masha", "http://cs411823.vk.me/v411823644/208c/HhJOWfXTTRY.jpg")
       ),
-      User("Daria" ,"http://cs628423.vk.me/v628423360/1b5b2/5jdASCmA_Q0.jpg") -> mutable.Buffer(
+      User("Daria", "http://cs628423.vk.me/v628423360/1b5b2/5jdASCmA_Q0.jpg") -> mutable.Buffer(
         User("Kate", "http://cs630216.vk.me/v630216644/2e126/mYG74XCSFcw.jpg"),
         User("Igor", "http://cs636930.vk.me/v636930922/2e4b/kponFFQLxUs.jpg"),
         User("Egor", "http://cs605817.vk.me/v605817644/3537/Jrl90veK9xE.jpg"),
@@ -50,55 +52,83 @@ object Storage{
         User("Max", "http://cs625722.vk.me/v625722760/5b1de/qGLHEiFw11o.jpg")
       )
       )
-    usersAndDialogs += "Max" -> mutable.Buffer(
-      User("Lebron", "http://cs9537.vk.me/u19071528/128071405/y_e4b59912.jpg"),
-      User("Daria", "http://cs628423.vk.me/v628423360/1b5b2/5jdASCmA_Q0.jpg")
-    )
-
-    usersAndInfo += (
-      "Max" ->  User("Max", "http://cs625722.vk.me/v625722760/5b1de/qGLHEiFw11o.jpg"),
-      "Lebron" -> User("Lebron", "http://cs9537.vk.me/u19071528/128071405/y_e4b59912.jpg"),
-      "Daria" -> User("Daria", "http://cs628423.vk.me/v628423360/1b5b2/5jdASCmA_Q0.jpg"),
-      "Kate" -> User("Kate", "http://cs630216.vk.me/v630216644/2e126/mYG74XCSFcw.jpg"),
-      "Igor" -> User("Igor", "http://cs636930.vk.me/v636930922/2e4b/kponFFQLxUs.jpg"),
-      "Egor" -> User("Egor", "http://cs605817.vk.me/v605817644/3537/Jrl90veK9xE.jpg"),
-      "Masha" -> User("Masha", "http://cs411823.vk.me/v411823644/208c/HhJOWfXTTRY.jpg"),
-      "Alex" -> User("Alex", "http://cs9537.vk.me/u19071528/128071405/y_321ff615.jpg"),
-      "Tom" -> User("Tom", "http://cs9537.vk.me/u19071528/128071405/y_b658902c.jpg")
+    usersAndDialogs += (
+      "Max" -> mutable.Buffer(
+        User("Lebron", "202cb962ac59075b964b07152d234b70", "http://cs9537.vk.me/u19071528/128071405/y_e4b59912.jpg"),
+        User("Daria", "202cb962ac59075b964b07152d234b70", "http://cs628423.vk.me/v628423360/1b5b2/5jdASCmA_Q0.jpg")),
+      "Lebron" -> mutable.Buffer(
+        User("Max", "202cb962ac59075b964b07152d234b70", "http://cs625722.vk.me/v625722760/5b1de/qGLHEiFw11o.jpg")),
+      "Daria" -> mutable.Buffer(
+        User("Max", "202cb962ac59075b964b07152d234b70", "http://cs625722.vk.me/v625722760/5b1de/qGLHEiFw11o.jpg"))
       )
 
+    usersAndInfo +=(
+      "Max" -> User("Max", "202cb962ac59075b964b07152d234b70", "http://cs625722.vk.me/v625722760/5b1de/qGLHEiFw11o.jpg"),
+      "Lebron" -> User("Lebron", "202cb962ac59075b964b07152d234b70", "http://cs9537.vk.me/u19071528/128071405/y_e4b59912.jpg"),
+      "Daria" -> User("Daria", "202cb962ac59075b964b07152d234b70", "http://cs628423.vk.me/v628423360/1b5b2/5jdASCmA_Q0.jpg"),
+      "Kate" -> User("Kate", "202cb962ac59075b964b07152d234b70", "http://cs630216.vk.me/v630216644/2e126/mYG74XCSFcw.jpg"),
+      "Igor" -> User("Igor", "202cb962ac59075b964b07152d234b70", "http://cs636930.vk.me/v636930922/2e4b/kponFFQLxUs.jpg"),
+      "Egor" -> User("Egor", "202cb962ac59075b964b07152d234b70", "http://cs605817.vk.me/v605817644/3537/Jrl90veK9xE.jpg"),
+      "Masha" -> User("Masha", "202cb962ac59075b964b07152d234b70", "http://cs411823.vk.me/v411823644/208c/HhJOWfXTTRY.jpg"),
+      "Alex" -> User("Alex", "202cb962ac59075b964b07152d234b70", "http://cs9537.vk.me/u19071528/128071405/y_321ff615.jpg"),
+      "Tom" -> User("Tom", "202cb962ac59075b964b07152d234b70", "http://cs9537.vk.me/u19071528/128071405/y_b658902c.jpg")
+      )
   }
 }
 
 class Application extends Controller {
 
-  def index = Action {
+  def index = Action { request =>
     println("index ")
-    val currentUser = "Max"
-    val currentUserDialogs = Storage.usersAndDialogs(currentUser)
+    val parameters = request.queryString.toMap
+    if (parameters.keys.isEmpty) {
+      Ok(views.html.authorization())
+    } else {
+      val login = parameters.get("login").get.head
+      val pmd5 = parameters.get("pmd5").get.head
+      val maybeUser = Storage.usersAndInfo.get(login)
 
-    Ok(views.html.main(currentUserDialogs))
+      maybeUser match {
+        case Some(User(l, md5, photo)) if l == login && md5 == pmd5 =>
+          println(s"User $login is log in")
+          val currentUserDialogs = Storage.usersAndDialogs.getOrElse(login,collection.mutable.Buffer[User]())
+          Ok(views.html.main(currentUserDialogs,l,md5))
+        case _ => Ok(views.html.authorization())
+      }
+    }
+
   }
 
   def getMessages(f1: String, f2: String) = Action {
     println("getMessagesByFriend()")
 
     val infoTo = Storage.usersAndInfo(f1)
-    var messages = mutable.Buffer[Message]()
+    val infoFrom = Storage.usersAndInfo(f2)
     if (f1.compare(f2) < 0) {
-      if(Storage.usersAndMassages.exists(_._1 == (f1,f2))) messages = Storage.usersAndMassages((f1, f2))
-    } else {
-      if(Storage.usersAndMassages.exists(_._1 == (f2,f1))) messages = Storage.usersAndMassages((f2, f1))
-    }
+      val messages = Storage.usersAndMassages.getOrElse((f1, f2), mutable.Buffer[Message]())
+      val jsValue = Json.obj(
+        "infoTo" -> Json.obj("login" -> infoTo.login, "photo" -> infoTo.photo),
+        "infoFrom" -> Json.obj("login" -> infoFrom.login, "photo" -> infoFrom.photo),
+        "mes" -> Json.arr(
+          messages.map(m => Json.obj("From" -> m.from, "To" -> m.to, "m" -> m.message))))
+      Ok(jsValue)
 
-    Ok(views.html.messages(infoTo,messages))
+    } else {
+      val messages = Storage.usersAndMassages.getOrElse((f2, f1), mutable.Buffer[Message]())
+      val jsValue = Json.obj(
+        "infoTo" -> Json.obj("login" -> infoTo.login, "photo" -> infoTo.photo),
+        "infoFrom" -> Json.obj("login" -> infoFrom.login, "photo" -> infoFrom.photo),
+        "mes" -> Json.arr(
+            messages.map(m => Json.obj("From" -> m.from, "To" -> m.to, "m" -> m.message))))
+      Ok(jsValue)
+    }
   }
 
   def getFriends(user: String) = Action {
     println("getFriends()")
     val info = Storage.usersAndInfo.get(user).get
 
-    if(Storage.usersAndFriends.exists(_._1 == info)){
+    if (Storage.usersAndFriends.exists(_._1 == info)) {
       println(Storage.usersAndFriends.get(info).get)
       Ok(views.html.friends(Storage.usersAndFriends.get(info).get))
     }
@@ -113,8 +143,8 @@ class Application extends Controller {
     println("check exist of dialog in hashMap= " + Storage.usersAndDialogs.exists(_._1 == from))
 
     //check exist of dialog in hashMap. If it doesn't exist then add new dialog
-    if(Storage.usersAndDialogs.exists(_._1 == from)){
-      if(!Storage.usersAndDialogs(from).contains(infoTo)){
+    if (Storage.usersAndDialogs.exists(_._1 == from)) {
+      if (!Storage.usersAndDialogs(from).contains(infoTo)) {
         Storage.usersAndDialogs.get(from).get += infoTo
         println(Storage.usersAndDialogs.get(from).get)
       }
@@ -122,26 +152,27 @@ class Application extends Controller {
     else Storage.usersAndDialogs += from -> mutable.Buffer(infoTo)
 
     //save new massage
-    if (from.compare(to) < 0){
-      if(Storage.usersAndMassages.exists(_._1 == (from,to))) Storage.usersAndMassages.get((from,to)).get += Message(from, to, message)
-      else Storage.usersAndMassages += (from,to) -> mutable.Buffer(Message(from, to, message))
+    if (from.compare(to) < 0) {
+      if (Storage.usersAndMassages.exists(_._1 ==(from, to))) Storage.usersAndMassages.get((from, to)).get += Message(from, to, message)
+      else Storage.usersAndMassages += (from, to) -> mutable.Buffer(Message(from, to, message))
     }
-    else{
-      if(Storage.usersAndMassages.exists(_._1 == (to,from))) Storage.usersAndMassages.get((to,from)).get += Message(from, to, message)
-      else Storage.usersAndMassages += (to,from) -> mutable.Buffer(Message(from, to, message))
+    else {
+      if (Storage.usersAndMassages.exists(_._1 ==(to, from))) Storage.usersAndMassages.get((to, from)).get += Message(from, to, message)
+      else Storage.usersAndMassages += (to, from) -> mutable.Buffer(Message(from, to, message))
     }
+    println(Message(from, to, message))
 
     Ok("")
   }
 
-  def getDialogs = Action {
-    println("getDialogs")
-
-    val currentUser = "Max"
-    val currentUserDialogs = Storage.usersAndDialogs(currentUser)
-
-    Ok(views.html.dialogs(currentUserDialogs))
-  }
+//  def getDialogs = Action {
+//    println("getDialogs")
+//
+//    val currentUser = "Max"
+//    val currentUserDialogs = Storage.usersAndDialogs(currentUser)
+//
+//    Ok(views.html.dialogs(currentUserDialogs))
+//  }
 
 
 }

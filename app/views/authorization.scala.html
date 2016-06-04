@@ -1,0 +1,43 @@
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Messenger</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/jquery.mobile-1.4.5.min.css")">
+        <script src="@routes.Assets.at("javascripts/jquery-1.9.0.min.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("javascripts/jquery.mobile-1.4.5.min.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("javascripts/md5.min.js")" type="text/javascript"></script>
+    </head>
+    <body>
+        <div data-role="page" id="main" data-theme="b">
+            <div data-role="header" style="background-color: black; height: 70px;">
+                <h1 style="font-size: 15pt;">Messenger</h1>
+            </div>
+            <div data-role="main" class="ui-content">
+                <input type="text" id="inputLogin">
+                <input type="password" id="inputPassword">
+                <button  class="ui-btn ui-btn-b ui-btn-inline ui-corner-all ui-shadow" onclick="login()">Login</button>
+            </div>
+        </div>
+
+        <script>
+                var l = localStorage.getItem("l");
+                var p = localStorage.getItem("p");
+                if(l && p){
+                    console.log(l, p);
+                    window.location = window.location.href + "?login="+l+"&pmd5="+p;
+                }
+              function login() {
+
+                  var l = $('#inputLogin').val();
+                  var p = md5($('#inputPassword').val());
+
+                  console.log(l, p);
+                  window.location = window.location.href + "?login="+l+"&pmd5="+p;
+              }
+        </script>
+    </body>
+</html>

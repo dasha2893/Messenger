@@ -99,27 +99,26 @@ class Application extends Controller {
 
   }
 
-  def getMessages(f1: String, f2: String) = Action {
+  def getMessages(friend: String, you: String) = Action {
     println("getMessagesByFriend()")
-
-    val infoTo = Storage.usersAndInfo(f1)
-    val infoFrom = Storage.usersAndInfo(f2)
-    if (f1.compare(f2) < 0) {
-      val messages = Storage.usersAndMassages.getOrElse((f1, f2), mutable.Buffer[Message]())
+    println("f1=" +friend)
+    println("f2=" +you)
+    val infoFriend = Storage.usersAndInfo(friend)
+    val infoYou = Storage.usersAndInfo(you)
+    if (friend.compare(you) < 0) {
+      val messages = Storage.usersAndMassages.getOrElse((friend, you), mutable.Buffer[Message]())
       val jsValue = Json.obj(
-        "infoTo" -> Json.obj("login" -> infoTo.login, "photo" -> infoTo.photo),
-        "infoFrom" -> Json.obj("login" -> infoFrom.login, "photo" -> infoFrom.photo),
-        "mes" -> Json.arr(
-          messages.map(m => Json.obj("From" -> m.from, "To" -> m.to, "m" -> m.message))))
+        "InfoFrom" -> Json.obj("login" -> infoFriend.login, "photo" -> infoFriend.photo),
+        "Messages" -> JsArray(
+          messages.map(m => Json.obj("from" -> m.from, "to" -> m.to, "message" -> m.message))))
       Ok(jsValue)
 
     } else {
-      val messages = Storage.usersAndMassages.getOrElse((f2, f1), mutable.Buffer[Message]())
+      val messages = Storage.usersAndMassages.getOrElse((you, friend), mutable.Buffer[Message]())
       val jsValue = Json.obj(
-        "infoTo" -> Json.obj("login" -> infoTo.login, "photo" -> infoTo.photo),
-        "infoFrom" -> Json.obj("login" -> infoFrom.login, "photo" -> infoFrom.photo),
-        "mes" -> Json.arr(
-            messages.map(m => Json.obj("From" -> m.from, "To" -> m.to, "m" -> m.message))))
+        "InfoFrom" -> Json.obj("login" -> infoFriend.login, "photo" -> infoFriend.photo),
+        "Messages" -> JsArray(
+            messages.map(m => Json.obj("from" -> m.from, "to" -> m.to, "message" -> m.message))))
       Ok(jsValue)
     }
   }

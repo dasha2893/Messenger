@@ -16,7 +16,7 @@
         <div data-role="page" id="main" data-theme="b">
             <div data-role="panel" id="menu" data-theme="b">
                 <ul style="list-style-type: none;">
-                    <li><a href="#friends" onclick="getFriends('Max')"><h3>Friends</h3></a></li>
+                    <li><a href="#friends" onclick="getFriends('@l')"><h3>Friends</h3></a></li>
                     <li><a href="#main"><h3>Dialogs</h3></a></li>
                     <li><a href="#settings"><h3>Settings</h3></a></li>
                 </ul>
@@ -70,7 +70,7 @@
                         <table style="width: 100%; margin: 0 10px; border-spacing: 10px 0;">
                             <tr>
                                 <td style="width: 70%;"><textarea id="inputMessage"></textarea></td>
-                                <td style="width: 20%;"><button class="ui-btn ui-btn-b ui-btn-inline ui-corner-all ui-shadow" onclick="sendMessage('','')">Send</button></td>
+                                <td style="width: 20%;"><button class="ui-btn ui-btn-b ui-btn-inline ui-corner-all ui-shadow" onclick="sendMessage('@l','')">Send</button></td>
                             </tr>
                         </table>
                     </div>
@@ -81,7 +81,7 @@
                         <table style="width: 100%; margin: 0 10px; border-spacing: 10px 0;">
                             <tr>
                                 <td style="width: 70%;"><textarea id="inputMessage"></textarea></td>
-                                <td style="width: 20%;"><button class="ui-btn ui-btn-b ui-btn-inline ui-corner-all ui-shadow" onclick="sendMessage('','')">Send</button></td>
+                                <td style="width: 20%;"><button class="ui-btn ui-btn-b ui-btn-inline ui-corner-all ui-shadow" onclick="sendMessage('@l','')">Send</button></td>
                             </tr>
                         </table>
                     </div>
@@ -114,30 +114,15 @@
 
             <!--Изоляция от траблов-->
         <script type="text/javascript">
+            var friendLogin = '';
             localStorage.setItem('l','@l');
             localStorage.setItem('p','@p');
-            var friendLogin = '';
+
             function exit() {
                 localStorage.clear();
                 window.location = window.location.href+ "/";
             }
 
-//            function getMessages(you,friend) {
-//                console.log(friend);
-//                $.ajax({
-//                    type: 'GET',
-//                    url: '/getMessages?f1=' +friend + '&f2=' + you,
-//                    success: function (data) {
-//                        console.log('data=' + data);
-//                        var messagesWithUsers = jQuery.parseJSON(JSON.stringify(data));
-//                        console.log('messagesWithUsers=' + messagesWithUsers);
-//                        console.log('messagesWithUsers.messages=' + messagesWithUsers.mes);
-//                    },
-//                    error: function (data) {
-//                        console.log('getMessages Error =  ' + data);
-//                    }
-//                });
-//            }
 
             function getFriends(user) {
                 $.ajax({
@@ -153,6 +138,8 @@
             }
 
             function sendMessage(from, to) {
+                if(to == '') to = friendLogin;
+                console.log('to =  ' + to);
                 var message =  $('#inputMessage').val();
                 console.log(message);
                 $('#allMessages').append('<div id="messageRight"><p>'+ message + '</p></div></br>');
@@ -183,17 +170,6 @@
                 });
             }
 
-//            function addMessages($scope) {
-//                $scope.messagesWithInfo ={
-//                    InfoFrom: {login: 'Daria', photo: 'http://cs628423.vk.me/v628423360/1b5b2/5jdASCmA_Q0.jpg'},
-//                    Messages: [{from: 'Daria', to: 'Max', message: 'Привет! Как дела?)'},{from: 'Max', to: 'Daria', message: 'Привет!) норм, а у тя?'},{from: 'Daria', to: 'Max', message: 'ЗБС'},{from: 'Daria', to: 'Max', message: 'Че делаешь'}]
-//                };
-//            }
-
-//
-//            function addMessages($scope) {
-//                $scope.messagesWithInfo ={"InfoFrom":{"login":"Daria","photo":"http://cs628423.vk.me/v628423360/1b5b2/5jdASCmA_Q0.jpg"},"Messages":[{"from":"Daria","to":"Max","message":"Привет! Как дела?)"},{"from":"Max","to":"Daria","message":"Привет!) норм, а у тя?"},{"from":"Daria","to":"Max","message":"ЗБС"},{"from":"Daria","to":"Max","message":"Че делаешь"},{"from":"Max","to":"Daria","message":"ниче, сижу в Messenger"},{"from":"Daria","to":"Max","message":"аа, ну и как?"},{"from":"Max","to":"Daria","message":"круто!!"}]};
-//            }
 
             angular
             .module('app', [])
@@ -201,6 +177,8 @@
 
             function addMessages($scope,$http) {
                 $scope.getMessages = function (you,friend) {
+                    if(you == '') you = localStorage.getItem('l');
+                    if(friend == '') friend = friendLogin;
                     console.log('friend= '+ friend);
                     console.log('you= '+ you);
                     $http.get('/getMessages?f1=' + friend + '&f2=' + you)
@@ -208,8 +186,7 @@
                                 $scope.messagesWithInfo = data;
                                 console.log('$scope.messagesWithInfo =  ' +  $scope.messagesWithInfo);
                                 friendLogin = $scope.messagesWithInfo.InfoFrom.login;
-                                console.log('friendLogin =  ' +   friendLogin);
-
+                                console.log('friendLogin =  ' + friendLogin);
                             })
                             .error(function (data, status, headers, config) {
                                 console.log('getMessages Error =  ' + data);

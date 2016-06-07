@@ -17,8 +17,8 @@
         @if(friendList != null){
             @for(friend <- friendList){
                 <li>
-                    <a href="#dialog" onclick="getMessages('@friend.login')">
-                        <img src='@friend.photo' style="padding: 10px; width: 100px; height: 60px;">
+                    <a href="#dialog" ng-click="getMessages('','@friend.login')">
+                        <img src='@friend.pmd5' style="padding: 10px; width: 100px; height: 60px;">
                         <h2>@friend.login</h2>
                     </a>
                 </li>

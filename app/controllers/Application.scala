@@ -3,8 +3,6 @@ package controllers
 import domain.{Message, User}
 import play.api.libs.json._
 import play.api.mvc._
-
-import scala.Option
 import scala.collection.mutable
 
 object Storage {
@@ -126,12 +124,16 @@ class Application extends Controller {
   def getFriends(user: String) = Action {
     println("getFriends()")
     val info = Storage.usersAndInfo.get(user).get
-
-    if (Storage.usersAndFriends.exists(_._1 == info)) {
-      println(Storage.usersAndFriends.get(info).get)
-      Ok(views.html.friends(Storage.usersAndFriends.get(info).get))
+    println("info= "+ info)
+    if (Storage.usersAndFriends.exists(_._1 == User(info.login,info.photo))) {
+      val listFriends = Storage.usersAndFriends.get(User(info.login,info.photo)).get
+      println(listFriends)
+      Ok(views.html.friends(listFriends))
     }
-    else Ok(views.html.friends(collection.mutable.Buffer()))
+    else {
+      println("nothing")
+      Ok(views.html.friends(collection.mutable.Buffer()))
+    }
   }
 
   def saveMessage(from: String, to: String, message: String) = Action {
@@ -163,15 +165,6 @@ class Application extends Controller {
 
     Ok("")
   }
-
-//  def getDialogs = Action {
-//    println("getDialogs")
-//
-//    val currentUser = "Max"
-//    val currentUserDialogs = Storage.usersAndDialogs(currentUser)
-//
-//    Ok(views.html.dialogs(currentUserDialogs))
-//  }
 
 
 }

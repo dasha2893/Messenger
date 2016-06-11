@@ -36,7 +36,8 @@ object Storage {
         User("Kate", "http://cs630216.vk.me/v630216644/2e126/mYG74XCSFcw.jpg"),
         User("Igor", "http://cs636930.vk.me/v636930922/2e4b/kponFFQLxUs.jpg"),
         User("Egor", "http://cs605817.vk.me/v605817644/3537/Jrl90veK9xE.jpg"),
-        User("Masha", "http://cs411823.vk.me/v411823644/208c/HhJOWfXTTRY.jpg")
+        User("Masha", "http://cs411823.vk.me/v411823644/208c/HhJOWfXTTRY.jpg"),
+        User("Daria", "http://cs628423.vk.me/v628423360/1b5b2/5jdASCmA_Q0.jpg")
       ),
       User("Daria", "http://cs628423.vk.me/v628423360/1b5b2/5jdASCmA_Q0.jpg") -> mutable.Buffer(
         User("Kate", "http://cs630216.vk.me/v630216644/2e126/mYG74XCSFcw.jpg"),
@@ -128,12 +129,15 @@ class Application extends Controller {
     println("info= "+ info)
     if (Storage.usersAndFriends.exists(_._1 == User(info.login,info.photo))) {
       val listFriends = Storage.usersAndFriends.get(User(info.login,info.photo)).get
-      println(listFriends)
-      Ok(views.html.friends(listFriends))
+      val jsArray = JsArray(
+        listFriends.map(f => Json.obj("login" -> f.login, "photo" -> f.pmd5))
+      )
+      println(jsArray)
+      Ok(jsArray)
     }
     else {
       println("nothing")
-      Ok(views.html.friends(collection.mutable.Buffer()))
+      Ok(JsArray())
     }
   }
 

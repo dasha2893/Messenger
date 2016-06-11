@@ -33,7 +33,7 @@
                 <ul data-role="listview" data-inset="true">
                     @for( friend <- currentUserDialogs) {
                         <li>
-                            <a href="#dialog" ng-click="getMessages('@l','@friend.login')">
+                            <a href="#dialog" data-ng-click="getMessages('@l','@friend.login')">
                                 <img src='@friend.photo' style="padding: 10px; width: 100px; height: 60px;">
                                 <h2>@friend.login</h2>
                             </a>
@@ -47,8 +47,7 @@
             <div style="width: 100%; height: auto;">
                 <div style="position: fixed; top: 0; left:0; right:0; height: 60px; width: 100%; margin: 0 auto;">
                     <ul id="nav">
-                        <li style="float: right;"><a href="#" style="background-color: black; border-color: black;" class="ui-btn ui-btn-b ui-btn-inline ui-corner-all ui-shadow" ng-click="getMessages('@l','')">Update</a></li>
-                        <li style="float: right;"><a href="#main" style="background-color: black; border-color: black;" class="ui-btn ui-btn-b ui-btn-inline ui-corner-all ui-shadow" >Close</a></li>
+                        <li style="float: right;"><a href="#main" style="background-color: black; border-color: black;" class="ui-btn ui-btn-b ui-btn-inline ui-corner-all ui-shadow" data-ng-click="closeDialog()">Close</a></li>
                         <li><img src='{{messagesWithInfo.InfoFrom.photo}}' style="padding: 5px 10px; width: 60px; height: 35px; vertical-align: middle;"></li>
                         <li><h3>{{messagesWithInfo.InfoFrom.login}}</h3></li>
                     </ul>
@@ -70,7 +69,7 @@
                         <table style="width: 100%; margin: 0 10px; border-spacing: 10px 0;">
                             <tr>
                                 <td style="width: 70%;"><textarea id="inputMessage"></textarea></td>
-                                <td style="width: 20%;"><button class="ui-btn ui-btn-b ui-btn-inline ui-corner-all ui-shadow" onclick="sendMessage('@l','')">Send</button></td>
+                                <td style="width: 20%;"><button class="ui-btn ui-btn-b ui-btn-inline ui-corner-all ui-shadow" data-ng-click="sendMessage('@l','')">Send</button></td>
                             </tr>
                         </table>
                     </div>
@@ -81,7 +80,7 @@
                         <table style="width: 100%; margin: 0 10px; border-spacing: 10px 0;">
                             <tr>
                                 <td style="width: 70%;"><textarea id="inputMessage"></textarea></td>
-                                <td style="width: 20%;"><button class="ui-btn ui-btn-b ui-btn-inline ui-corner-all ui-shadow" onclick="sendMessage('@l','')">Send</button></td>
+                                <td style="width: 20%;"><button class="ui-btn ui-btn-b ui-btn-inline ui-corner-all ui-shadow" data-ng-click="sendMessage('@l','')">Send</button></td>
                             </tr>
                         </table>
                     </div>
@@ -137,25 +136,25 @@
                 });
             }
 
-            function sendMessage(from, to) {
-                if(to == '') to = friendLogin;
-                console.log('to =  ' + to);
-                var message =  $('#inputMessage').val();
-                console.log(message);
-                $('#allMessages').append('<div id="messageRight"><p>'+ message + '</p></div></br>');
-                document.body.scrollTop = document.body.scrollHeight;
-                $.ajax({
-                    type: 'GET',
-                    url: '/saveMessage?from=' + from + '&to=' + to + '&message=' + message,
-                    success: function (data) {
-                        console.log('Success!');
-                    },
-                    error: function (data) {
-                        console.log('sendMessage Error =  ' + data);
-                    }
-                });
-                $('#inputMessage').val('');
-            }
+//            function sendMessage(from, to) {
+//                if(to == '') to = friendLogin;
+//                console.log('to =  ' + to);
+//                var message =  $('#inputMessage').val();
+//                console.log(message);
+//                $('#allMessages').append('<div id="messageRight"><p>'+ message + '</p></div></br>');
+//                document.body.scrollTop = document.body.scrollHeight;
+//                $.ajax({
+//                    type: 'GET',
+//                    url: '/saveMessage?from=' + from + '&to=' + to + '&message=' + message,
+//                    success: function (data) {
+//                        console.log('Success!');
+//                    },
+//                    error: function (data) {
+//                        console.log('sendMessage Error =  ' + data);
+//                    }
+//                });
+//                $('#inputMessage').val('');
+//            }
 
             function getDialogs() {
                 $.ajax({
@@ -170,17 +169,22 @@
                 });
             }
 
-
             angular
             .module('app', [])
             .controller('addMessages', addMessages);
 
-            function addMessages($scope,$http) {
+            function addMessages($scope,$http,$interval) {
+                var interval;
                 $scope.getMessages = function (you,friend) {
                     if(you == '') you = localStorage.getItem('l');
                     if(friend == '') friend = friendLogin;
                     console.log('friend= '+ friend);
                     console.log('you= '+ you);
+
+                    // stops any running interval to avoid two intervals running at the same time
+                    $scope.closeDialog();
+
+                    //ajax for get messages
                     $http.get('/getMessages?f1=' + friend + '&f2=' + you)
                             .success(function (data) {
                                 $scope.messagesWithInfo = data;
@@ -189,12 +193,49 @@
                                 console.log('friendLogin =  ' + friendLogin);
                             })
                             .error(function (data, status, headers, config) {
-                                console.log('getMessages Error =  ' + data);
+                                console.log('getMessages Error =  ' + status);
                             });
+
+
+                    // $interval repeats the execution of the function continuously in the 5 seconds interval
+                    interval = $interval(function () {
+                        $http.get('/getMessages?f1=' + friend + '&f2=' + you)
+                                .success(function (data) {
+                                    $scope.messagesWithInfo = data;
+                                    console.log('$scope.messagesWithInfo =  ' +  $scope.messagesWithInfo);
+                                    friendLogin = $scope.messagesWithInfo.InfoFrom.login;
+                                    console.log('friendLogin =  ' + friendLogin);
+                                })
+                                .error(function (data, status, headers, config) {
+                                    console.log('getMessages Error =  ' + status);
+                                });
+                    }, 100);
                 };
+
+                $scope.sendMessage = function (from, to) {
+                    if(to == '') to = friendLogin;
+                    console.log('to =  ' + to);
+                    var message =  $('#inputMessage').val();
+                    console.log(message);
+//                    document.body.scrollTop = document.body.scrollHeight;
+                    $.ajax({
+                        type: 'GET',
+                        url: '/saveMessage?from=' + from + '&to=' + to + '&message=' + message,
+                        success: function (data) {
+                            console.log('Success!');
+                        },
+                        error: function (data) {
+                            console.log('sendMessage Error =  ' + data);
+                        }
+                    });
+                    $('#inputMessage').val('');
+                };
+
+                // stops the interval
+                $scope.closeDialog = function () {
+                    $interval.cancel(interval);
+                }
             }
-
-
 
         </script>
     </body>

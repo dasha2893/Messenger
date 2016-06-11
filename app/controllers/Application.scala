@@ -105,6 +105,7 @@ class Application extends Controller {
     val infoYou = Storage.usersAndInfo(you)
     if (friend.compare(you) < 0) {
       val messages = Storage.usersAndMassages.getOrElse((friend, you), mutable.Buffer[Message]())
+      println(messages)
       val jsValue = Json.obj(
         "InfoFrom" -> Json.obj("login" -> infoFriend.login, "photo" -> infoFriend.photo),
         "Messages" -> JsArray(

@@ -1,8 +1,9 @@
 package controllers
 
 import domain.{Message, User}
-import play.api.libs.json._
 import play.api.mvc._
+
+import scala.Option
 import scala.collection.mutable
 
 object Storage {
@@ -25,7 +26,7 @@ object Storage {
         Message(from = "Max", to = "Daria", "круто!!")
       ),
       "Lebron" -> "Max" -> mutable.Buffer(
-        Message(from = "Max", to = "Lebron", "Hey man! How are you after loosing 6th NBA final?"),
+        Message(from = "Max", to = "Lebron", "Hey man! How are user after loosing 6th NBA final?"),
         Message(from = "Lebron", to = "Max", "Shit, I will kill Steph next season"),
         Message(from = "Lebron", to = "Max", "Good luck!!!")
       )
@@ -36,8 +37,7 @@ object Storage {
         User("Kate", "http://cs630216.vk.me/v630216644/2e126/mYG74XCSFcw.jpg"),
         User("Igor", "http://cs636930.vk.me/v636930922/2e4b/kponFFQLxUs.jpg"),
         User("Egor", "http://cs605817.vk.me/v605817644/3537/Jrl90veK9xE.jpg"),
-        User("Masha", "http://cs411823.vk.me/v411823644/208c/HhJOWfXTTRY.jpg"),
-        User("Daria", "http://cs628423.vk.me/v628423360/1b5b2/5jdASCmA_Q0.jpg")
+        User("Masha", "http://cs411823.vk.me/v411823644/208c/HhJOWfXTTRY.jpg")
       ),
       User("Daria", "http://cs628423.vk.me/v628423360/1b5b2/5jdASCmA_Q0.jpg") -> mutable.Buffer(
         User("Kate", "http://cs630216.vk.me/v630216644/2e126/mYG74XCSFcw.jpg"),
@@ -98,28 +98,18 @@ class Application extends Controller {
 
   }
 
-  def getMessages(friend: String, you: String) = Action {
+  def getMessages(f1: String, f2: String) = Action {
     println("getMessagesByFriend()")
-    println("f1=" +friend)
-    println("f2=" +you)
-    val infoFriend = Storage.usersAndInfo(friend)
-    val infoYou = Storage.usersAndInfo(you)
-    if (friend.compare(you) < 0) {
-      val messages = Storage.usersAndMassages.getOrElse((friend, you), mutable.Buffer[Message]())
-      println(messages)
-      val jsValue = Json.obj(
-        "InfoFrom" -> Json.obj("login" -> infoFriend.login, "photo" -> infoFriend.photo),
-        "Messages" -> JsArray(
-          messages.map(m => Json.obj("from" -> m.from, "to" -> m.to, "message" -> m.message))))
-      Ok(jsValue)
+
+    val infoTo = Storage.usersAndInfo(f1)
+    val infoFrom = Storage.usersAndInfo(f2)
+    if (f1.compare(f2) < 0) {
+      val massages = Storage.usersAndMassages.getOrElse((f1, f2), mutable.Buffer[Message]())
+      Ok(views.html.messages(infoTo,infoFrom, massages))
 
     } else {
-      val messages = Storage.usersAndMassages.getOrElse((you, friend), mutable.Buffer[Message]())
-      val jsValue = Json.obj(
-        "InfoFrom" -> Json.obj("login" -> infoFriend.login, "photo" -> infoFriend.photo),
-        "Messages" -> JsArray(
-            messages.map(m => Json.obj("from" -> m.from, "to" -> m.to, "message" -> m.message))))
-      Ok(jsValue)
+      val messages = Storage.usersAndMassages.getOrElse((f2, f1), mutable.Buffer[Message]())
+      Ok(views.html.messages(infoTo, infoFrom, messages))
     }
   }
 
@@ -129,15 +119,12 @@ class Application extends Controller {
     println("info= "+ info)
     if (Storage.usersAndFriends.exists(_._1 == User(info.login,info.photo))) {
       val listFriends = Storage.usersAndFriends.get(User(info.login,info.photo)).get
-      val jsArray = JsArray(
-        listFriends.map(f => Json.obj("login" -> f.login, "photo" -> f.pmd5))
-      )
-      println(jsArray)
-      Ok(jsArray)
+      println(listFriends)
+      Ok(views.html.friends(listFriends))
     }
     else {
       println("nothing")
-      Ok(JsArray())
+      Ok(views.html.friends(collection.mutable.Buffer()))
     }
   }
 
@@ -170,6 +157,13 @@ class Application extends Controller {
 
     Ok("")
   }
+
+//  def getDialogs(user: String) = Action {
+//    println("getDialogs")
+//    val currentUserDialogs = Storage.usersAndDialogs(user)
+//
+//    Ok(views.html.dialogs(currentUserDialogs))
+//  }
 
 
 }

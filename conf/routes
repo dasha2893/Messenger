@@ -7,7 +7,7 @@ GET     /                           controllers.Application.index
 GET     /getMessages                controllers.Application.getMessages(f1: String, f2:String)
 GET     /getFriends                 controllers.Application.getFriends(user: String)
 GET     /saveMessage                controllers.Application.saveMessage(from: String, to: String, message: String)
-#GET     /getDialogs                 controllers.Application.getDialogs
+#GET     /getDialogs                 controllers.Application.getDialogs(user: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

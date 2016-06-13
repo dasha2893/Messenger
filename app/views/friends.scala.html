@@ -3,7 +3,6 @@
 <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/jquery.mobile-1.4.5.min.css")">
 <script src="@routes.Assets.at("javascripts/jquery-1.9.0.min.js")" type="text/javascript"></script>
 <script src="@routes.Assets.at("javascripts/jquery.mobile-1.4.5.min.js")" type="text/javascript"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
 
 <div style="width: 100%; height: auto;">
     <div style="position: fixed; top: 0; left:0; right:0; height: 60px; width: 100%; margin: 0 auto; z-index: 10;">
@@ -18,7 +17,7 @@
         @if(friendList != null){
             @for(friend <- friendList){
                 <li>
-                    <a href="#dialog" data-ng-click="getMessages('','@friend.login')">
+                    <a href="#dialog" onclick="getMessages('','@friend.login')">
                         <img src='@friend.pmd5' style="padding: 10px; width: 100px; height: 60px;">
                         <h2>@friend.login</h2>
                     </a>
